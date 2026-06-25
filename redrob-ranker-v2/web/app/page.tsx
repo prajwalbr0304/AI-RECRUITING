@@ -222,8 +222,7 @@ export default function Page() {
     <div className="flex">
       <Sidebar tab={tab} setTab={setTab} />
       <main className="flex-1 min-w-0">
-        <TopBar tabLabel={tab} />
-
+        {tab === "candidates" && <TopBar tabLabel={tab} />}
         <div className="px-7 py-6 space-y-5">
           {/* title row - changes based on active tab */}
           <div className="flex items-end justify-between gap-4 flex-wrap">
