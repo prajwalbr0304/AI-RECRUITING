@@ -18,8 +18,8 @@ const items: { id: Tab; label: string; icon: (p: { className?: string }) => JSX.
 ];
 
 export default function Sidebar({
-  tab, setTab, ranked, honeypots,
-}: { tab: Tab; setTab: (t: Tab) => void; ranked: number; honeypots: number }) {
+  tab, setTab,
+}: { tab: Tab; setTab: (t: Tab) => void }) {
   const [collapsed, setCollapsed] = useState(true);
 
   return (
@@ -38,21 +38,13 @@ export default function Sidebar({
         {items.map((it) => {
           const Icon = it.icon;
           const active = tab === it.id;
-          const badge = it.id === "candidates" ? ranked : it.id === "integrity" ? honeypots : null;
           return (
             <div key={it.id} onClick={() => setTab(it.id)}
               className={`navitem ${active ? "navitem-active" : ""} ${collapsed ? "justify-center px-0" : ""}`}
               title={collapsed ? it.label : undefined}>
               <Icon className="h-[18px] w-[18px] shrink-0" />
               {!collapsed && (
-                <>
-                  <span className="flex-1">{it.label}</span>
-                  {badge ? (
-                    <span className={`pill ${active ? "bg-brand/15 text-brand-dark" : "bg-gray-100 text-ink-muted"}`}>
-                      {badge.toLocaleString()}
-                    </span>
-                  ) : null}
-                </>
+                <span className="flex-1">{it.label}</span>
               )}
             </div>
           );

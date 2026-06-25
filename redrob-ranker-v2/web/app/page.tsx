@@ -220,7 +220,7 @@ export default function Page() {
 
   return (
     <div className="flex">
-      <Sidebar tab={tab} setTab={setTab} ranked={summary?.ranked ?? 0} honeypots={summary?.honeypots ?? 0} />
+      <Sidebar tab={tab} setTab={setTab} />
       <main className="flex-1 min-w-0">
         <TopBar tabLabel={tab} />
 
