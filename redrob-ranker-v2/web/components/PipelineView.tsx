@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import { api } from "@/lib/api";
-import type { Shortlist, TaskCandidate, TaskSummary } from "@/lib/types";
+import type { Shortlist, TaskSummary } from "@/lib/types";
 import { IconChevron, IconPlus, IconTrash, IconLayers, IconDatabase, IconCheck, IconRefresh, IconDownload } from "./icons";
 
 function downloadFile(filename: string, content: string, mime: string) {
@@ -87,43 +87,12 @@ function SetupNotice() {
   );
 }
 
-function AddToShortlist({ shortlists, onAdd }: { shortlists: Shortlist[]; onAdd: (slId: string) => void }) {
-  const [open, setOpen] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    function onDoc(e: MouseEvent) { if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false); }
-    document.addEventListener("mousedown", onDoc);
-    return () => document.removeEventListener("mousedown", onDoc);
-  }, []);
-  return (
-    <div className="relative" ref={ref}>
-      <button onClick={(e) => { e.stopPropagation(); setOpen((o) => !o); }}
-        className="px-2.5 py-1 rounded-md text-xs font-medium bg-brand-wash text-brand-dark hover:bg-brand/10 flex items-center gap-1">
-        <IconPlus className="h-3.5 w-3.5" /> Add
-      </button>
-      {open && (
-        <div className="absolute right-0 top-full mt-1 w-44 bg-white border border-line rounded-lg shadow-pop py-1 z-20">
-          <div className="px-3 py-1.5 text-[11px] font-semibold text-ink-faint uppercase tracking-wide">Add to shortlist</div>
-          {shortlists.length === 0 && <div className="px-3 py-2 text-xs text-ink-faint">No shortlists yet</div>}
-          {shortlists.map((sl) => (
-            <button key={sl.id} onClick={(e) => { e.stopPropagation(); onAdd(sl.id); setOpen(false); }}
-              className="w-full text-left px-3 py-1.5 text-sm hover:bg-gray-50 flex items-center gap-2">
-              <IconLayers className="h-3.5 w-3.5 text-ink-faint" /> {sl.name}
-            </button>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-}
 
 export default function PipelineView() {
   const [enabled, setEnabled] = useState<boolean | null>(null);
   const [tasks, setTasks] = useState<TaskSummary[]>([]);
   const [taskId, setTaskId] = useState("");
-  const [candidates, setCandidates] = useState<TaskCandidate[]>([]);
   const [shortlists, setShortlists] = useState<Shortlist[]>([]);
-  const [loading, setLoading] = useState(false);
   const [newName, setNewName] = useState("");
   const [busy, setBusy] = useState(false);
 
@@ -138,11 +107,7 @@ export default function PipelineView() {
 
   const selectTask = (id: string) => {
     setTaskId(id);
-    setLoading(true);
-    Promise.all([api.taskCandidates(id, "top200"), api.shortlists(id)])
-      .then(([c, s]) => { setCandidates(c.items || []); setShortlists(s.items || []); })
-      .catch(() => {})
-      .finally(() => setLoading(false));
+    api.shortlists(id).then((s) => setShortlists(s.items || [])).catch(() => {});
   };
 
   const refreshShortlists = () => api.shortlists(taskId).then((s) => setShortlists(s.items || [])).catch(() => {});
@@ -152,17 +117,6 @@ export default function PipelineView() {
     setBusy(true);
     try { await api.createShortlist(taskId, name); setNewName(""); await refreshShortlists(); }
     finally { setBusy(false); }
-  };
-
-  const addMember = async (slId: string, c: TaskCandidate) => {
-    try {
-      await api.addMember(slId, {
-        candidate_id: c.candidate_id, rank: c.rank, score: c.score,
-        current_title: c.current_title || undefined, current_company: c.current_company || undefined,
-        years_experience: c.years_experience ?? undefined, task_id: taskId,
-      } as any);
-      await refreshShortlists();
-    } catch { /* ignore */ }
   };
 
   const removeMember = async (memberId: number) => { await api.removeMember(memberId).catch(() => {}); refreshShortlists(); };
@@ -218,32 +172,7 @@ export default function PipelineView() {
           No ranking tasks stored yet. Run a ranking on the <span className="font-semibold text-ink-soft">Candidates</span> tab — it will be saved here automatically.
         </div>
       ) : (
-        <div className="grid lg:grid-cols-5 gap-4">
-          {/* Candidates */}
-          <div className="card overflow-hidden lg:col-span-3">
-            <div className="px-4 py-3 border-b border-line bg-gray-50/60 flex items-center justify-between">
-              <div className="font-semibold text-sm">Task candidates (top {candidates.length})</div>
-              <span className="text-xs text-ink-faint">click “Add” to place into a shortlist</span>
-            </div>
-            <div className="max-h-[560px] overflow-auto divide-y divide-line">
-              {loading && <div className="p-6 text-center text-ink-faint text-sm">Loading candidates…</div>}
-              {!loading && candidates.map((c) => (
-                <div key={c.candidate_id} className="flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50">
-                  <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-gray-100 text-gray-600 text-xs font-semibold shrink-0">{c.rank}</span>
-                  <div className="min-w-0 flex-1">
-                    <div className="text-sm font-medium truncate">{c.current_title || "—"}</div>
-                    <div className="text-xs text-ink-faint font-mono truncate">{c.candidate_id}{c.current_company ? ` · ${c.current_company}` : ""}</div>
-                  </div>
-                  <span className="text-sm font-bold tabular-nums w-9 text-right">{Number(c.score).toFixed(0)}</span>
-                  <AddToShortlist shortlists={shortlists} onAdd={(slId) => addMember(slId, c)} />
-                </div>
-              ))}
-              {!loading && !candidates.length && <div className="p-6 text-center text-ink-faint text-sm">No stored candidates for this task.</div>}
-            </div>
-          </div>
-
-          {/* Shortlists */}
-          <div className="lg:col-span-2 space-y-4">
+        <div className="space-y-4">
             <div className="card p-4">
               <div className="font-semibold text-sm mb-2 flex items-center gap-2"><IconLayers className="h-4 w-4 text-brand" /> Create shortlist</div>
               <div className="flex items-center gap-2">
@@ -289,7 +218,6 @@ export default function PipelineView() {
                 </div>
               </div>
             ))}
-          </div>
         </div>
       )}
     </div>

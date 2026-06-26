@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { IconGrid, IconChart, IconShield, IconAlert, IconTarget, IconWrench, IconTerminal, IconChevron, IconBolt, IconUsers, IconBriefcase, IconClose } from "./icons";
+import { IconGrid, IconChart, IconShield, IconAlert, IconTarget, IconTerminal, IconChevron, IconBolt, IconUsers, IconBriefcase, IconClose } from "./icons";
 
 export type Tab = "candidates" | "insights" | "role" | "integrity" | "governance" | "compare" | "pipeline" | "nextai" | "audit" | "settings";
 
@@ -14,7 +14,6 @@ const items: { id: Tab; label: string; icon: (p: { className?: string }) => JSX.
   { id: "pipeline", label: "Pipeline", icon: IconBriefcase },
   { id: "nextai", label: "NextAi", icon: IconBolt },
   { id: "audit", label: "Audit", icon: IconTerminal },
-  { id: "settings", label: "Settings", icon: IconWrench },
 ];
 
 export default function Sidebar({
@@ -42,7 +41,7 @@ export default function Sidebar({
       >
         {/* Brand + mobile close */}
         <div className={`py-5 flex items-center gap-3 px-5 ${collapsed ? "lg:justify-center lg:px-2" : ""}`}>
-          <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-brand to-brand-light grid place-items-center text-white font-extrabold text-[10px] shadow-sm shrink-0">Nh</div>
+          <img src="/N.svg" alt="Nexthire" className="h-12 w-12 rounded-xl object-contain shrink-0" />
           <div className={collapsed ? "lg:hidden" : ""}>
             <div className="font-bold text-[15px] leading-tight">Nexthire</div>
             <div className="text-xs text-ink-faint">Precision in every hire</div>
@@ -71,13 +70,6 @@ export default function Sidebar({
           })}
         </nav>
 
-        <div className={`border-t border-line flex items-center gap-3 px-4 py-4 ${collapsed ? "lg:justify-center lg:px-2" : ""}`}>
-          <div className="h-9 w-9 rounded-full bg-ink text-white grid place-items-center text-xs font-bold shrink-0">PB</div>
-          <div className={`leading-tight ${collapsed ? "lg:hidden" : ""}`}>
-            <div className="text-sm font-semibold">Prajwal B.</div>
-            <div className="text-xs text-ink-faint">Talent Ops · Admin</div>
-          </div>
-        </div>
 
         {/* Desktop collapse toggle */}
         <button

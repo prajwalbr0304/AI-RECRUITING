@@ -13,7 +13,7 @@ const SEV: Record<string, { label: string; badge: string; border: string; dot: s
 };
 const sevOf = (s: string) => SEV[s] ?? SEV.medium;
 
-const GRID = "grid-cols-[150px_minmax(150px,1.1fr)_minmax(170px,1fr)_minmax(120px,0.8fr)_230px_104px_52px]";
+const GRID = "grid-cols-[150px_minmax(150px,1.1fr)_minmax(290px,1.4fr)_minmax(120px,0.8fr)_230px_104px_52px]";
 
 function download(filename: string, content: string, mime: string) {
   const blob = new Blob([content], { type: mime });
@@ -35,7 +35,7 @@ function StatCard({ label, value, sub, accent }: { label: string; value: string;
   return (
     <div className="card p-4">
       <div className="text-[11px] font-bold uppercase tracking-wider text-ink-faint">{label}</div>
-      <div className="text-[26px] font-extrabold tracking-tight mt-1 truncate" style={{ color: accent }} title={value}>{value}</div>
+      <div className={`font-extrabold tracking-tight mt-1 ${value.length > 12 ? "text-base leading-snug" : "text-[26px] truncate"}`} style={{ color: accent }} title={value}>{value}</div>
       {sub && <div className="text-xs text-ink-faint mt-0.5">{sub}</div>}
     </div>
   );
@@ -91,6 +91,8 @@ export default function IntegrityView({ h, onLog }: { h: Honeypots | null; onLog
   const [sort, setSort] = useState<"severe" | "recent">("severe");
   const [expanded, setExpanded] = useState<string[]>([]);
   const [statusMap, setStatusMap] = useState<Record<string, string>>({});
+  const [page, setPage] = useState(1);
+  const PAGE_SIZE = 50;
 
   const items = h?.items ?? [];
   const vtypes = useMemo(() => {
@@ -111,6 +113,11 @@ export default function IntegrityView({ h, onLog }: { h: Honeypots | null; onLog
     else out.reverse();
     return out;
   }, [items, query, vfilter, sort]);
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const safePage = Math.min(page, totalPages);
+  const paged = filtered.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
+  useEffect(() => { setPage(1); }, [query, vfilter, sort]);
 
   const handleAction = (a: string, it: HoneypotItem) => {
     if (a === "override") { setStatusMap((m) => ({ ...m, [it.candidate_id]: "overridden" })); onLog?.(`Integrity block overridden for ${it.candidate_id}`); }
@@ -157,7 +164,7 @@ export default function IntegrityView({ h, onLog }: { h: Honeypots | null; onLog
       {/* Stats bar */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5">
         <StatCard label="Total flagged this run" value={(h?.total ?? 0).toLocaleString()} sub="excluded from ranking" accent="#e25950" />
-        <StatCard label="Showing in view" value={(h?.showing ?? items.length).toLocaleString()} sub={`of ${(h?.total ?? 0).toLocaleString()} flagged`} accent="#1a1f36" />
+        <StatCard label="Showing in view" value={filtered.length.toLocaleString()} sub={vfilter === "all" && !query ? "all flagged profiles" : `of ${(h?.total ?? 0).toLocaleString()} flagged`} accent="#1a1f36" />
         <StatCard label="Most common violation" value={h?.most_common_violation ?? "—"} accent="#d97706" />
         <StatCard label="Resume inflation rate" value={`${h?.inflation_rate ?? 0}%`} sub="flagged / total pool" accent="#e25950" />
       </div>
@@ -196,7 +203,7 @@ export default function IntegrityView({ h, onLog }: { h: Honeypots | null; onLog
       {/* Exclusion log table */}
       <div className="card overflow-hidden">
         <div className="overflow-x-auto">
-          <div className="min-w-[990px]">
+          <div className="min-w-[1120px]">
             {/* Header */}
             <div className={`grid ${GRID} items-center gap-3 px-4 py-2.5 border-b border-line bg-gray-50/70 text-[11px] font-semibold tracking-wide text-ink-faint uppercase`}>
               <div>Candidate ID</div>
@@ -208,7 +215,7 @@ export default function IntegrityView({ h, onLog }: { h: Honeypots | null; onLog
               <div className="text-center">Action</div>
             </div>
             {/* Rows */}
-            {filtered.map((it, i) => {
+            {paged.map((it, i) => {
               const sev = sevOf(it.severity);
               const status = statusMap[it.candidate_id] ?? "blocked";
               const isOpen = expanded.includes(it.candidate_id);
@@ -222,7 +229,7 @@ export default function IntegrityView({ h, onLog }: { h: Honeypots | null; onLog
                     <div className="text-sm text-ink-soft truncate" title={it.title}>{it.title || "—"}</div>
                     <div className="flex items-center gap-2 min-w-0">
                       <span className={`h-2 w-2 rounded-full shrink-0 ${sev.dot}`} />
-                      <span className="text-sm text-ink truncate" title={it.violation_type}>{it.violation_type}</span>
+                      <span className="text-sm text-ink whitespace-nowrap" title={it.violation_type}>{it.violation_type}</span>
                     </div>
                     <div className="text-sm text-ink-soft truncate" title={it.flagged_skill ?? ""}>{it.flagged_skill ?? "—"}</div>
                     <div className="flex items-center gap-2">
@@ -264,13 +271,21 @@ export default function IntegrityView({ h, onLog }: { h: Honeypots | null; onLog
             )}
           </div>
         </div>
-        <div className="flex items-center justify-between px-4 py-2.5 border-t border-line bg-gray-50/50 text-xs text-ink-faint">
-          <span>Showing {filtered.length.toLocaleString()} of {(h?.total ?? 0).toLocaleString()} flagged profiles</span>
-          <span className="flex items-center gap-3">
-            {Object.entries(SEV).map(([k, v]) => (
-              <span key={k} className="flex items-center gap-1"><span className={`h-2 w-2 rounded-full ${v.dot}`} />{v.label}</span>
-            ))}
+        <div className="flex items-center justify-between gap-3 px-4 py-2.5 border-t border-line bg-gray-50/50 text-xs text-ink-faint flex-wrap">
+          <span>
+            {filtered.length ? `${(safePage - 1) * PAGE_SIZE + 1}–${(safePage - 1) * PAGE_SIZE + paged.length}` : 0} of {filtered.length.toLocaleString()} {vfilter === "all" && !query ? "flagged" : "matching"} profiles
           </span>
+          <div className="flex items-center gap-1.5">
+            <button onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={safePage <= 1}
+              className="px-2.5 py-1 rounded-md border border-line bg-white text-ink-soft hover:bg-gray-50 disabled:opacity-40 disabled:hover:bg-white flex items-center gap-1">
+              <IconChevron className="h-3.5 w-3.5 rotate-180" /> Prev
+            </button>
+            <span className="px-2 tabular-nums">Page {safePage} of {totalPages}</span>
+            <button onClick={() => setPage((p) => Math.min(totalPages, p + 1))} disabled={safePage >= totalPages}
+              className="px-2.5 py-1 rounded-md border border-line bg-white text-ink-soft hover:bg-gray-50 disabled:opacity-40 disabled:hover:bg-white flex items-center gap-1">
+              Next <IconChevron className="h-3.5 w-3.5" />
+            </button>
+          </div>
         </div>
       </div>
     </div>

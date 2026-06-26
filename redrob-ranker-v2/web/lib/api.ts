@@ -34,7 +34,7 @@ export const api = {
   candidate: (id: string) => get<Detail>(`/api/candidate/${id}`),
   analytics: () => get<Analytics>("/api/analytics"),
   compliance: () => get<Compliance>("/api/compliance"),
-  honeypots: () => get<Honeypots>("/api/honeypots?limit=200"),
+  honeypots: () => get<Honeypots>("/api/honeypots?limit=100000"),
   jobIntent: () => get<JobIntent>("/api/job-intent"),
   rank: async (body: Record<string, unknown>) => {
     const r = await fetch("/api/rank", {

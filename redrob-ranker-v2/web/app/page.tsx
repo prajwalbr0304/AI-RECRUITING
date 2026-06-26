@@ -287,9 +287,9 @@ export default function Page() {
   // lazy load per-tab data
   useEffect(() => {
     if (!ready) return;
-    if (tab === "insights" && !analytics) api.analytics().then(setAnalytics).catch(() => {});
+    if (tab === "insights") api.analytics().then(setAnalytics).catch(() => {});
     if (tab === "governance" && !compliance) api.compliance().then(setCompliance).catch(() => {});
-    if (tab === "integrity" && !honeypots) api.honeypots().then(setHoneypots).catch(() => {});
+    if (tab === "integrity") api.honeypots().then(setHoneypots).catch(() => {});
     if (tab === "role" && !jobIntent) api.jobIntent().then(setJobIntent).catch(() => {});
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tab, ready]);
@@ -667,7 +667,7 @@ export default function Page() {
                 : tab === "insights" ? <InsightsView a={analytics} />
                 : tab === "governance" ? <GovernanceView c={compliance} />
                 : tab === "integrity" ? <IntegrityView h={honeypots} onLog={(m) => flog("info", m)} />
-                : tab === "role" ? <RoleView j={jobIntent} onRank={onRank} running={running} onReindex={() => api.jobIntent().then(setJobIntent).catch(() => {})} onGoToCandidates={() => setTab("candidates")} />
+                : tab === "role" ? <RoleView j={jobIntent} onRank={onRank} running={running} onReindex={() => api.jobIntent().then(setJobIntent).catch(() => {})} />
                 : <Empty />}
             </div>
           )}

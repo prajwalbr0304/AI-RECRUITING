@@ -3,12 +3,9 @@ import { useState } from "react";
 import type { JobIntent } from "@/lib/types";
 import {
   IconTarget, IconRefresh, IconSpark, IconCheck, IconAlert, IconClose,
-  IconChevron, IconClock, IconDatabase, IconCopy, IconPencil, IconChart, IconShield,
+  IconChevron, IconClock, IconDatabase, IconCopy, IconChart, IconShield,
 } from "./icons";
 import { Empty } from "./Views";
-
-const ROLE_TABS = ["Interpretation", "Matched candidates", "Version history", "Settings"] as const;
-type RoleTab = (typeof ROLE_TABS)[number];
 
 // ---- Confidence ring (semantic colours: success / warning / danger) ----------
 function ConfidenceRing({ value }: { value: number }) {
@@ -82,15 +79,13 @@ function fmtTime(iso?: string) {
 }
 
 export default function RoleView({
-  j, onRank, running, onReindex, onGoToCandidates,
+  j, onRank, running, onReindex,
 }: {
   j: JobIntent | null;
   onRank: () => void;
   running: boolean;
   onReindex?: () => void;
-  onGoToCandidates?: () => void;
 }) {
-  const [tab, setTab] = useState<RoleTab>("Interpretation");
   const [copied, setCopied] = useState(false);
   const [dismissed, setDismissed] = useState<string[]>([]);
 
@@ -140,31 +135,14 @@ export default function RoleView({
               className="btn bg-white border border-line text-ink-soft hover:bg-gray-50 disabled:opacity-50">
               <IconRefresh className="h-4 w-4" /> Re-index
             </button>
-            <button onClick={() => setTab("Settings")}
-              className="btn bg-white border border-line text-ink-soft hover:bg-gray-50">
-              <IconPencil className="h-4 w-4" /> Edit role
-            </button>
             <button onClick={onRank} disabled={running} className="btn-primary disabled:opacity-50">
               <IconSpark className="h-4 w-4" /> {running ? "Ranking…" : "Run ranking"}
             </button>
           </div>
         </div>
-
-        {/* Tab bar */}
-        <div className="flex items-center gap-1 mt-4 border-b border-line -mb-5 overflow-x-auto">
-          {ROLE_TABS.map((t) => (
-            <button key={t} onClick={() => setTab(t)}
-              className={`px-3 py-2.5 text-sm font-medium border-b-2 -mb-px whitespace-nowrap transition-colors ${
-                tab === t ? "border-brand text-brand-dark" : "border-transparent text-ink-muted hover:text-ink"
-              }`}>
-              {t}
-            </button>
-          ))}
-        </div>
       </div>
 
-      {tab === "Interpretation" && (
-        <>
+      <>
           {/* Confidence banner */}
           {conf && (
             <div className="card p-5">
@@ -309,69 +287,6 @@ export default function RoleView({
             </SectionCard>
           </div>
         </>
-      )}
-
-      {tab === "Matched candidates" && (
-        <div className="card p-8 text-center">
-          <div className="h-12 w-12 rounded-2xl bg-brand-wash text-brand grid place-items-center mx-auto mb-3">
-            <IconTarget className="h-6 w-6" />
-          </div>
-          <div className="font-semibold text-ink">
-            {stats?.candidates_in_pool ? `${stats.candidates_in_pool.toLocaleString()} candidates scored against this role` : "No ranking run yet"}
-          </div>
-          <div className="text-sm text-ink-muted mt-1 max-w-md mx-auto">
-            The ranked leaderboard lives on the Candidates tab, where you can filter, compare and shortlist matches.
-          </div>
-          <button onClick={onGoToCandidates} className="btn-primary mt-4 mx-auto">
-            <IconChevron className="h-4 w-4" /> Go to Candidates
-          </button>
-        </div>
-      )}
-
-      {tab === "Version history" && (
-        <SectionCard label="Version history" title="Indexes, ranking runs & signal edits">
-          <div className="relative pl-5 mt-3">
-            <div className="absolute left-[5px] top-1.5 bottom-1.5 w-px bg-line" />
-            <div className="space-y-4">
-              {(j.activity_log ?? []).map((a, i) => (
-                <div key={i} className="relative">
-                  <span className="absolute -left-5 top-1 h-2.5 w-2.5 rounded-full bg-brand border-2 border-white shadow-sm" />
-                  <div className="text-sm text-ink-soft">{a.label}</div>
-                  <div className="text-[11px] text-ink-faint mt-0.5">{fmtTime(a.ts)} · {a.type}</div>
-                </div>
-              ))}
-              {!(j.activity_log ?? []).length && <span className="text-sm text-ink-faint">No history recorded.</span>}
-            </div>
-          </div>
-        </SectionCard>
-      )}
-
-      {tab === "Settings" && (
-        <div className="grid lg:grid-cols-2 gap-4">
-          <SectionCard label="Retrieval configuration">
-            {ret ? (
-              <div className="mt-2 divide-y divide-line">
-                <Row label="Embedding model" value={ret.embedding_model} mono />
-                <Row label="Embedding backend" value={ret.embedding_backend} />
-                <Row label="Vector store" value={ret.vector_store} />
-                <Row label="Top-k shortlist" value={ret.top_k.toLocaleString()} />
-                <Row label="Re-rank size" value={ret.rerank_size.toLocaleString()} />
-                <Row label="Dense dimensions" value={String(ret.dense_dim)} />
-              </div>
-            ) : <span className="text-sm text-ink-faint">No configuration available.</span>}
-          </SectionCard>
-          <SectionCard label="Council weights" title="Read-only — tune via Adjust Weights on Candidates">
-            <div className="space-y-3 mt-3">
-              {(j.weights ?? []).map((w) => (
-                <div key={w.key} className="flex items-center justify-between text-sm">
-                  <span className="text-ink-soft">{w.label}</span>
-                  <span className="font-bold tabular-nums text-ink">{w.pct}%</span>
-                </div>
-              ))}
-            </div>
-          </SectionCard>
-        </div>
-      )}
     </div>
   );
 }
@@ -382,15 +297,6 @@ function Meta({ icon, label, value }: { icon: React.ReactNode; label: string; va
       <span className="text-ink-faint">{icon}</span>
       <span className="text-ink-faint">{label}:</span>
       <span className="font-medium text-ink-soft">{value}</span>
-    </div>
-  );
-}
-
-function Row({ label, value, mono }: { label: string; value: string; mono?: boolean }) {
-  return (
-    <div className="flex items-center justify-between gap-3 py-2 text-sm">
-      <span className="text-ink-muted shrink-0">{label}</span>
-      <span className={`text-ink-soft text-right truncate ${mono ? "font-mono text-xs" : "font-medium"}`}>{value}</span>
     </div>
   );
 }

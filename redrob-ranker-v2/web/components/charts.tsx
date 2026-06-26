@@ -22,7 +22,7 @@ export function ChartCard({
   children: React.ReactNode; className?: string;
 }) {
   return (
-    <div className={`card p-5 ${className}`}>
+    <div className={`card p-4 sm:p-5 ${className}`}>
       <div className="flex items-start justify-between gap-3">
         <div>
           <div className="font-semibold text-ink">{title}</div>
@@ -133,8 +133,8 @@ export function HBars({
   return (
     <div className="mt-4 space-y-2.5">
       {data.map((d, i) => (
-        <div key={i} className="flex items-center gap-3">
-          <div className="w-28 shrink-0 text-xs text-ink-soft truncate text-right" title={d.label}>{d.label}</div>
+        <div key={i} className="flex items-center gap-2 sm:gap-3">
+          <div className="w-20 sm:w-28 shrink-0 text-xs text-ink-soft truncate text-right" title={d.label}>{d.label}</div>
           <div className="flex-1 h-5 rounded-md bg-gray-100 overflow-hidden relative">
             <div className="h-full rounded-md absolute inset-y-0 left-0" style={{ width: `${(d.count / max) * 100}%`, background: color, opacity: 0.25 }} />
             {showOverlay && d.overlay != null && (
@@ -144,7 +144,7 @@ export function HBars({
               <div className="h-full rounded-md absolute inset-y-0 left-0" style={{ width: `${(d.count / max) * 100}%`, background: color }} />
             )}
           </div>
-          <div className="w-16 shrink-0 text-xs font-semibold tabular-nums text-right">
+          <div className="w-14 sm:w-16 shrink-0 text-xs font-semibold tabular-nums text-right">
             {d.count.toLocaleString()}
             {showOverlay && d.overlay != null && <span className="text-ink-faint font-normal"> ·{d.overlay}</span>}
           </div>
@@ -164,7 +164,7 @@ export function DonutChart({
   const R = 52, C = 2 * Math.PI * R;
   let offset = 0;
   return (
-    <div className="flex items-center gap-5 mt-4">
+    <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-5 mt-4">
       <div className="relative h-[136px] w-[136px] shrink-0">
         <svg viewBox="0 0 140 140" className="-rotate-90">
           <circle cx="70" cy="70" r={R} fill="none" stroke="#eef1f5" strokeWidth="16" />
@@ -214,7 +214,7 @@ export function Radar({
   const poly = axes.map((a, i) => pt(i, R * Math.max(0, Math.min(1, a.value))).join(",")).join(" ");
   return (
     <div className="mt-3 flex justify-center">
-      <svg viewBox={`0 0 ${size} ${size}`} style={{ width: size, height: size }}>
+      <svg viewBox={`0 0 ${size} ${size}`} className="w-full max-w-[300px] h-auto" style={{ aspectRatio: "1 / 1" }}>
         {[0.25, 0.5, 0.75, 1].map((g) => (
           <polygon key={g} points={axes.map((_, i) => pt(i, R * g).join(",")).join(" ")}
             fill="none" stroke="#e3e8ee" strokeWidth="1" />
@@ -295,15 +295,15 @@ export function Funnel({ data }: { data: { stage: string; count: number }[] }) {
         const w = Math.max((d.count / top) * 100, 6);
         const pct = ((d.count / top) * 100).toFixed(1);
         return (
-          <div key={i} className="flex items-center gap-3">
-            <div className="w-32 shrink-0 text-xs text-ink-soft text-right">{d.stage}</div>
+          <div key={i} className="flex items-center gap-2 sm:gap-3">
+            <div className="w-20 sm:w-32 shrink-0 text-xs text-ink-soft text-right">{d.stage}</div>
             <div className="flex-1 flex justify-center">
               <div className="h-9 rounded-md grid place-items-center text-white text-xs font-bold transition-all"
                 style={{ width: `${w}%`, background: PALETTE[i % PALETTE.length], minWidth: 60 }}>
                 {d.count.toLocaleString()}
               </div>
             </div>
-            <div className="w-12 shrink-0 text-xs text-ink-faint tabular-nums">{pct}%</div>
+            <div className="w-10 sm:w-12 shrink-0 text-xs text-ink-faint tabular-nums">{pct}%</div>
           </div>
         );
       })}

@@ -58,7 +58,7 @@ export default function InsightsView({ a }: { a: Analytics | null }) {
       </ChartCard>
 
       {/* Education analysis */}
-      <div className="grid lg:grid-cols-3 gap-4">
+      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
         <ChartCard title="Institution tier" subtitle="Education prestige distribution.">
           <DonutChart data={a.education.tiers} centerLabel="profiles" />
         </ChartCard>
