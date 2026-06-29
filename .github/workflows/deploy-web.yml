@@ -1,6 +1,6 @@
 name: Build & publish container (GHCR)
 
-# Builds the full Next.js + FastAPI image (redrob-ranker-v2/Dockerfile.web) and
+# Builds the full Next.js + FastAPI image (NextHire/Dockerfile.web) and
 # pushes it to GitHub Container Registry. Uses the built-in GITHUB_TOKEN, so no
 # secrets need to be configured. The HuggingFace Space pulls this same image.
 
@@ -8,7 +8,7 @@ on:
   push:
     branches: [main]
     paths:
-      - "redrob-ranker-v2/**"
+      - "NextHire/**"
       - ".github/workflows/deploy-web.yml"
   workflow_dispatch:
 
@@ -42,8 +42,8 @@ jobs:
       - name: Build and push
         uses: docker/build-push-action@v6
         with:
-          context: ./redrob-ranker-v2
-          file: ./redrob-ranker-v2/Dockerfile.web
+          context: ./NextHire
+          file: ./NextHire/Dockerfile.web
           push: true
           tags: |
             ${{ steps.img.outputs.name }}:latest

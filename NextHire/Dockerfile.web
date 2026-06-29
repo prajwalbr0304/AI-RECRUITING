@@ -9,7 +9,7 @@
 #   docker build -f Dockerfile.web -t nexthire .
 #   docker run --rm -p 7860:7860 nexthire   # -> http://localhost:7860
 #
-# Build context MUST be the redrob-ranker-v2/ directory.
+# Build context MUST be the NextHire/ directory.
 # ---------------------------------------------------------------------------
 
 # ----- Stage 1: build the Next.js frontend into a static bundle (web/out) ----
@@ -27,7 +27,7 @@ FROM python:3.13-slim-bookworm AS runtime
 
 LABEL org.opencontainers.image.title="NextHire — AI Recruiting Brain" \
       org.opencontainers.image.description="Next.js + FastAPI app over the Council-of-Nine candidate ranking engine." \
-      org.opencontainers.image.source="https://github.com/prajwalbr0304/AI-RECRUITING"
+      org.opencontainers.image.source="https://github.com/prajwalbr0304/NextHire"
 
 ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \

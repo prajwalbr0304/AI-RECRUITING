@@ -20,5 +20,5 @@ This Space runs the prebuilt container image published to GHCR by the project's
 GitHub Actions workflow. Upload your own JSON/JSONL candidate pool, pick a role,
 tune the Council weights, and rank.
 
-- Source: https://github.com/prajwalbr0304/AI-RECRUITING
+- Source: https://github.com/prajwalbr0304/NextHire
 - Image: `ghcr.io/prajwalbr0304/nexthire:latest`

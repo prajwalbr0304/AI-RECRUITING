@@ -2,7 +2,7 @@
 FastAPI backend for THE AI RECRUITING BRAIN — Council edition.
 
 Exposes the Council-of-Nine ranking engine to the Next.js frontend.
-Run:  uvicorn api.main:app --port 8000   (from the redrob-ranker-v2 root)
+Run:  uvicorn api.main:app --port 8000   (from the NextHire root)
 """
 from __future__ import annotations
 
