@@ -36,7 +36,6 @@ ENV PYTHONUNBUFFERED=1 \
     TRANSFORMERS_OFFLINE=1 \
     TOKENIZERS_PARALLELISM=false \
     REDROB_EMBED_BACKEND=lsa \
-    REDROB_CANDIDATES=/app/sample_candidates.json \
     REDROB_UPLOAD_DIR=/tmp/redrob_uploads \
     HOME=/home/appuser \
     PORT=7860
@@ -47,11 +46,11 @@ WORKDIR /app
 COPY requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
 
-# App: the ranking engine + API + a bundled demo pool so it ranks out-of-the-box.
+# App: the Council-of-Nine ranking engine + API (no bundled dataset — the user
+# must upload a candidate pool before ranking).
 COPY api ./api
 COPY src ./src
 COPY artifacts ./artifacts
-COPY sample_candidates.json ./
 
 # The statically-exported Next.js dashboard (served by FastAPI at "/").
 COPY --from=web /web/out ./web_out

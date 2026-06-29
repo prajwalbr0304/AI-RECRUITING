@@ -244,7 +244,13 @@ export default function Page() {
 
   const onRank = useCallback(async () => {
     if (!role) return;
-    flog("info", `POST /api/rank · role='${role}' · dataset=${staged ? staged.name : "default"}`);
+    if (!staged) {
+      setShowUploadError(true);
+      setUploadErrorMessage("Upload a candidate file before ranking.");
+      flog("error", "Cannot rank: upload a candidate file first.");
+      return;
+    }
+    flog("info", `POST /api/rank · role='${role}' · dataset=${staged.name}`);
     try {
       await api.rank({
         role, weights,
@@ -447,7 +453,8 @@ export default function Page() {
                 {/* Rank Candidates Button - Shows "Re-rank" only when role/weights are changed AFTER initial ranking */}
                 <button
                   onClick={onRank}
-                  disabled={running || !role}
+                  disabled={running || !role || !staged}
+                  title={!staged ? "Upload a candidate file first" : undefined}
                   className="btn-primary disabled:opacity-50 flex items-center gap-2"
                 >
                   {running ? "Ranking..." : (hasRanked && dirty) ? (
